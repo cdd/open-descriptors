@@ -4,9 +4,9 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [compojure "1.1.6"]
                  [ring/ring-json "0.2.0"]
-                 [org.openscience.cdk/cdk "1.4.18"]]
+                 ; NOTE: currently installing CDK from local jar; see README
+                 [org.openscience.cdk/cdk "1.5.5"]]
   :plugins [[lein-ring "0.8.10"]]
-  :repositories {"U. Cambridge maven repository" "https://maven.ch.cam.ac.uk/content/repositories/thirdparty/"}
   :ring {:handler open-descriptors.handler/app}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]

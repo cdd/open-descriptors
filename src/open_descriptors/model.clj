@@ -1,6 +1,6 @@
 (ns open-descriptors.model
-  (:import (org.openscience.cdk Molecule)
-           (org.openscience.cdk Molecule)
+  (:import (org.openscience.cdk DefaultChemObjectBuilder)
+           (org.openscience.cdk.interfaces IAtomContainer)
            (org.openscience.cdk.io MDLReader)
            (org.openscience.cdk.qsar.descriptors.molecular ALOGPDescriptor HBondAcceptorCountDescriptor HBondDonorCountDescriptor RotatableBondsCountDescriptor TPSADescriptor VABCDescriptor WeightDescriptor)
            (org.openscience.cdk.qsar.result DoubleArrayResult IntegerArrayResult DoubleResult IntegerResult BooleanResult)
@@ -8,9 +8,17 @@
            (java.io StringReader))
   )
 
+(defn new-atom-container []
+  ; Yes, this really is how you say "new Molecule" in CDK:
+  ;     DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class)
+  ; The Clojure version is even worse, because the method accepts variable additional
+  ; args, and you MUST pass an empty array for those or the method won't be found.
+  (.newInstance (DefaultChemObjectBuilder/getInstance) IAtomContainer (to-array [])))
+
 (defn read-molfile [molfile]
   (let [reader (new MDLReader (new StringReader molfile))]
-    (try (.read reader (new Molecule))
+    (try
+      (.read reader (new-atom-container))
       (catch Exception e))))
 
 (defn extract-value [descriptor-value]

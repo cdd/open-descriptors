@@ -20,6 +20,22 @@ You will need [Leiningen][1] 1.7.0 or above installed.
 
 [1]: https://github.com/technomancy/leiningen
 
+### Temporary local installation of CDK
+
+Collaborative Drug Discovery's additions to CDK aren't available via Maven yet, so build the jar from our [CDK repository][2]:
+
+    ant dist-large
+
+Add this to your ~/.lein/profiles.clj
+
+    {:user {:plugins [[lein-localrepo "0.5.3"]]}}
+
+And install the jar locally
+
+    lein localrepo install cdk-1.5.5.git.jar org.openscience.cdk/cdk 1.5.5
+
+[2]: https://github.com/cdd/cdk
+
 ## Running
 
 To start a web server for the application, run:
