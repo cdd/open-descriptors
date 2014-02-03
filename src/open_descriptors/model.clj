@@ -43,7 +43,7 @@
       :vendor (.getImplementationVendor spec))))
 
 (defn descriptor-from-class [i klass]
-  (let [descriptor (clojure.lang.Reflector/invokeConstructor klass (to-array []))]
+  (let [descriptor (.newInstance klass)]
     (sorted-map
       :information (information (+ i 1) descriptor) ; TODO: will need to use some sort of persistent id or URI in the long run
       :descriptor descriptor)))
