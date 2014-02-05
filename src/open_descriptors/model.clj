@@ -2,7 +2,7 @@
   (:import (org.openscience.cdk DefaultChemObjectBuilder)
            (org.openscience.cdk.interfaces IAtomContainer)
            (org.openscience.cdk.io MDLReader)
-           (org.openscience.cdk.qsar.descriptors.molecular ALOGPDescriptor HBondAcceptorCountDescriptor HBondDonorCountDescriptor RotatableBondsCountDescriptor TPSADescriptor VABCDescriptor WeightDescriptor)
+           (org.openscience.cdk.qsar.descriptors.molecular ALOGPDescriptor FractionalPSADescriptor HBondAcceptorCountDescriptor HBondDonorCountDescriptor RotatableBondsCountDescriptor SmallRingDescriptor WeightDescriptor)
            (org.openscience.cdk.qsar.result DoubleArrayResult IntegerArrayResult DoubleResult IntegerResult BooleanResult)
            (org.openscience.cdk.geometry.volume VABCVolume)
            (java.io StringReader))
@@ -51,11 +51,11 @@
   "Vector of descriptors, each of which is a map."
   (map-indexed descriptor-from-class [
     ALOGPDescriptor
+    FractionalPSADescriptor ; tpsaEfficiency
     HBondAcceptorCountDescriptor
     HBondDonorCountDescriptor
     RotatableBondsCountDescriptor
-    TPSADescriptor
-    VABCDescriptor
+    SmallRingDescriptor ; Think we want both "nSmallRings" and "nAromRings"
     WeightDescriptor]))
 
 (def descriptor-information
