@@ -33,14 +33,13 @@
 (defn information [id descriptor]
   (let [spec (.getSpecification descriptor)]
     (sorted-map
-      ; our id, rather than implementation-specific 'identifier' below :(
-      :id id
+      :identifier id
       ; TODO: next line needs to change if we want to expose descriptors that aren't first
       :name (aget (.getDescriptorNames descriptor) 0)
-      :reference (.getSpecificationReference spec)
-      :title (.getImplementationTitle spec)
-      :identifier (.getImplementationIdentifier spec)
-      :vendor (.getImplementationVendor spec))))
+      :specification_reference (.getSpecificationReference spec)
+      :implementation_title (.getImplementationTitle spec)
+      :implementation_identifier (.getImplementationIdentifier spec)
+      :implementation_vendor (.getImplementationVendor spec))))
 
 (defn descriptor-from-class [i klass]
   (let [descriptor (.newInstance klass)]
@@ -69,7 +68,7 @@
     (flatten
       (map 
         #(vector
-          (get-in % [:information :id])
+          (get-in % [:information :identifier])
           (extract-value (.calculate (% :descriptor) molecule))) 
         descriptors))))
 
