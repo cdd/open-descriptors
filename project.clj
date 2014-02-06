@@ -1,4 +1,4 @@
-(defproject open-descriptors "0.1.1-SNAPSHOT"
+(defproject open-descriptors "0.1.2-SNAPSHOT"
   :description "A JSON API for calculating open source molecular descriptors."
   :url "http://collaborativedrug.com"
   :dependencies [[org.clojure/clojure "1.5.1"]
