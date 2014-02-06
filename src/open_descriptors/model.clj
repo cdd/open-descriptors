@@ -70,7 +70,7 @@
       ; which is automatically set using the 'ident' gitattribute. We only need the hash part.
       :identifier (get (clojure.string/split (.getImplementationIdentifier spec) #" ") 1)
       :vendor (.getImplementationVendor spec)
-      :resultType (result-type descriptor))))
+      :result_type (result-type descriptor))))
 
 (defn fingerprinter-information [fingerprinter type-name]
   (sorted-map
