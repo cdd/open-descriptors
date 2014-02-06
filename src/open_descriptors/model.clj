@@ -3,7 +3,7 @@
            (org.openscience.cdk.interfaces IAtomContainer)
            (org.openscience.cdk.io MDLReader)
            (org.openscience.cdk.qsar.descriptors.molecular ALOGPDescriptor FractionalPSADescriptor HBondAcceptorCountDescriptor HBondDonorCountDescriptor RotatableBondsCountDescriptor SmallRingDescriptor WeightDescriptor)
-           (org.openscience.cdk.qsar.result DoubleArrayResult IntegerArrayResult DoubleResult IntegerResult BooleanResult)
+           (org.openscience.cdk.qsar.result DoubleArrayResult IntegerArrayResult DoubleResult IntegerResult BooleanResult DoubleArrayResultType IntegerArrayResultType DoubleResultType IntegerResultType BooleanResultType)
            (org.openscience.cdk.geometry.volume VABCVolume)
            (java.io StringReader))
   )
@@ -24,38 +24,58 @@
 (defn extract-value [descriptor-value]
   (let [result (.getValue descriptor-value)]
     (condp instance? result
-      DoubleArrayResult (.get result 0)
-      IntegerArrayResult (.get result 0)
-      DoubleResult (.doubleValue result)
-      IntegerResult (.intValue result)
-      BooleanResult (.booleanValue result))))
+      DoubleArrayResult (map #(.get result %) (range 0 (.length result))) ; why don't they let you access the array?
+      IntegerArrayResult (map #(.get result %) (range 0 (.length result)))
+      DoubleResult [(.doubleValue result)]
+      IntegerResult [(.intValue result)]
+      BooleanResult [(.booleanValue result)])))
 
-(defn information [id descriptor]
+(defn result-type [descriptor]
+  (let [foo (.getDescriptorResultType descriptor)]
+    (condp instance? foo
+      ; Implementations of .getDescriptorResultType are inconsistent in CDK:
+      ; some classes return a *ResultType, others a *Result. This wouldn't be
+      ; so bad if *Result classes always subclassed the corresponding
+      ; *ResultType, but some don't!
+      ; TODO: fix result classes and .getDescriptorResultType in CDK :(
+      DoubleArrayResultType "double"
+      IntegerArrayResultType "integer"
+      DoubleResultType "double"
+      IntegerResultType "integer"
+      BooleanResultType "boolean"
+      DoubleArrayResult "double"
+      IntegerArrayResult "integer"
+      DoubleResult "double"
+      IntegerResult "integer"
+      BooleanResult "integer")))
+
+(defn information [descriptor]
   (let [spec (.getSpecification descriptor)]
     (sorted-map
-      :identifier id
-      ; TODO: next line needs to change if we want to expose descriptors that aren't first
-      :name (aget (.getDescriptorNames descriptor) 0)
-      :specification_reference (.getSpecificationReference spec)
-      :implementation_title (.getImplementationTitle spec)
-      :implementation_identifier (.getImplementationIdentifier spec)
-      :implementation_vendor (.getImplementationVendor spec))))
+      :names (vec (.getDescriptorNames descriptor)) ; convert to a vector because Java Array can't be JSON-encoded.
+      :reference (.getSpecificationReference spec)
+      :title (.getImplementationTitle spec)
+      ; implementationIdentifier takes the form "$Id: 7e0424d7aa78f533fd179ddb684958273371887a $",
+      ; which is automatically set using the 'ident' gitattribute. We only need the hash part.
+      :identifier (get (clojure.string/split (.getImplementationIdentifier spec) #" ") 1)
+      :vendor (.getImplementationVendor spec)
+      :resultType (result-type descriptor))))
 
-(defn descriptor-from-class [i klass]
+(defn descriptor-from-class [klass]
   (let [descriptor (.newInstance klass)]
     (sorted-map
-      :information (information (+ i 1) descriptor) ; TODO: will need to use some sort of persistent id or URI in the long run
+      :information (information descriptor)
       :descriptor descriptor)))
 
 (def descriptors
   "Vector of descriptors, each of which is a map."
-  (map-indexed descriptor-from-class [
+  (map descriptor-from-class [
     ALOGPDescriptor
-    FractionalPSADescriptor ; tpsaEfficiency
+    FractionalPSADescriptor
     HBondAcceptorCountDescriptor
     HBondDonorCountDescriptor
     RotatableBondsCountDescriptor
-    SmallRingDescriptor ; Think we want both "nSmallRings" and "nAromRings"
+    SmallRingDescriptor
     WeightDescriptor]))
 
 (def descriptor-information
@@ -63,12 +83,10 @@
   (map #(% :information) descriptors)) ; "pluck" :information from members of collection
 
 (defn calculate [molecule]
-  "Returns a sorted map of descriptor id/value pairs for the molecule"
-  (apply sorted-map
-    (flatten
-      (map 
-        #(vector
-          (get-in % [:information :identifier])
-          (extract-value (.calculate (% :descriptor) molecule))) 
-        descriptors))))
-
+  "Returns a map of descriptor id/value pairs for the molecule"
+  (into {}
+    (map
+      #(vector
+        (get-in % [:information :identifier])
+        (extract-value (.calculate (% :descriptor) molecule)))
+      descriptors)))
