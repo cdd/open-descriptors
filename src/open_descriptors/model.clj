@@ -27,12 +27,12 @@
   (condp instance? descriptor
     IFingerprinter
       (let [fp (.getCountFingerprint descriptor molecule)]
-        (into {}
+        [(into {}
           (map
             #(vector
               (.getHash fp %)
               (.getCount fp %))
-            (range 0 (.numOfPopulatedbins fp)))))
+            (range 0 (.numOfPopulatedbins fp))))])
     (let [result (.getValue (.calculate descriptor molecule))]
       (condp instance? result
         DoubleArrayResult (map #(.get result %) (range 0 (.length result))) ; why don't they let you access the array?
