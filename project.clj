@@ -7,7 +7,9 @@
                  ; NOTE: currently installing CDK from local jar; see README
                  [org.openscience.cdk/cdk "1.5.5"]]
   :plugins [[lein-ring "0.8.10"]]
-  :ring {:handler open-descriptors.handler/app}
+  :ring {
+    :handler open-descriptors.handler/app
+    :port 3030} ; You can override this by setting the PORT environment variable
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
                         [ring-mock "0.1.5"]]}})
