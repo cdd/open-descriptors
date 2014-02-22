@@ -1,7 +1,7 @@
 (ns open-descriptors.model
   (:import (org.openscience.cdk DefaultChemObjectBuilder)
            (org.openscience.cdk.interfaces IAtomContainer)
-           (org.openscience.cdk.io MDLReader)
+           (org.openscience.cdk.io MDLV2000Reader MDLV3000Reader)
            (org.openscience.cdk.qsar.descriptors.molecular ALOGPDescriptor FractionalPSADescriptor HBondAcceptorCountDescriptor HBondDonorCountDescriptor RotatableBondsCountDescriptor SmallRingDescriptor WeightDescriptor)
            (org.openscience.cdk.fingerprint CircularFingerprinter IFingerprinter)
            (org.openscience.cdk.qsar.result DoubleArrayResult IntegerArrayResult DoubleResult IntegerResult BooleanResult DoubleArrayResultType IntegerArrayResultType DoubleResultType IntegerResultType BooleanResultType)
@@ -16,8 +16,14 @@
   ; args, and you MUST pass an empty array for those or the method won't be found.
   (.newInstance (DefaultChemObjectBuilder/getInstance) IAtomContainer (to-array [])))
 
+(defn mdl-reader [molfile]
+  ; CDK might detect the molfile version and use the correct reader for us in the future.
+  (if (re-find #"^(.*\n){3}.*V3000" molfile)
+    (new MDLV3000Reader (new StringReader molfile))
+    (new MDLV2000Reader (new StringReader molfile))))
+
 (defn read-molfile [molfile]
-  (let [reader (new MDLReader (new StringReader molfile))]
+  (let [reader (mdl-reader molfile)]
     (try
       (.read reader (new-atom-container))
       (catch Exception e))))
