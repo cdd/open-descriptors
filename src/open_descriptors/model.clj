@@ -1,11 +1,10 @@
 (ns open-descriptors.model
-  (:import (org.openscience.cdk DefaultChemObjectBuilder)
+  (:import (org.openscience.cdk DefaultChemObjectBuilder CDK)
            (org.openscience.cdk.interfaces IAtomContainer)
            (org.openscience.cdk.io MDLV2000Reader MDLV3000Reader)
            (org.openscience.cdk.qsar.descriptors.molecular ALOGPDescriptor FractionalPSADescriptor HBondAcceptorCountDescriptor HBondDonorCountDescriptor RotatableBondsCountDescriptor SmallRingDescriptor WeightDescriptor)
            (org.openscience.cdk.fingerprint CircularFingerprinter IFingerprinter)
            (org.openscience.cdk.qsar.result DoubleArrayResult IntegerArrayResult DoubleResult IntegerResult BooleanResult DoubleArrayResultType IntegerArrayResultType DoubleResultType IntegerResultType BooleanResultType)
-           (org.openscience.cdk.geometry.volume VABCVolume)
            (java.io StringReader))
   )
 
@@ -33,6 +32,7 @@
   (condp instance? descriptor
     IFingerprinter
       (let [fp (.getCountFingerprint descriptor molecule)]
+        ; Would be nice to just have access to the HashMap, instead we reconstruct it
         [(into {}
           (map
             #(vector
@@ -69,21 +69,21 @@
 (defn information [descriptor]
   (let [spec (.getSpecification descriptor)]
     (sorted-map
+      :identifier (str (.getSimpleName (type descriptor)) ":" (.getImplementationIdentifier spec))
       :names (vec (.getDescriptorNames descriptor)) ; convert to a vector because Java Array can't be JSON-encoded.
       :reference (.getSpecificationReference spec)
       :title (.getImplementationTitle spec)
-      ; implementationIdentifier takes the form "$Id: 7e0424d7aa78f533fd179ddb684958273371887a $",
-      ; which is automatically set using the 'ident' gitattribute. We only need the hash part.
-      :identifier (get (clojure.string/split (.getImplementationIdentifier spec) #" ") 1)
+      :version (.getImplementationIdentifier spec)
       :vendor (.getImplementationVendor spec)
       :result_type (result-type descriptor))))
 
 (defn fingerprinter-information [fingerprinter type-name]
   (sorted-map
+    :identifier (str type-name ":" (CDK/getVersion))
     :names [type-name]
     :reference ["http://pubs.acs.org/doi/abs/10.1021/ci100050t"] ; TODO: replace with Alex's forthcoming paper
     :title (.getName (type fingerprinter))
-    :identifier type-name ; TODO: revisit identifier when class changes
+    :version (CDK/getVersion)
     :vendor "The Chemistry Development Kit"
     :result_type "object"))
 
