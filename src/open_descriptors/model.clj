@@ -100,6 +100,7 @@
 (defn calculate [molecule]
   "Returns a map of descriptor id/value pairs for the molecule"
   (into {}
+    ; Would be nice to use pmap, but under heavy load I was seeing java.util.ConcurrentModificationException
     (map
       #(vector
         (get-in % [:information :identifier])
