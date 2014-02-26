@@ -1,31 +1,8 @@
 (ns open-descriptors.model
-  (:import (org.openscience.cdk DefaultChemObjectBuilder CDK)
-           (org.openscience.cdk.interfaces IAtomContainer)
-           (org.openscience.cdk.io MDLV2000Reader MDLV3000Reader)
+  (:import (org.openscience.cdk CDK)
            (org.openscience.cdk.qsar.descriptors.molecular ALOGPDescriptor FractionalPSADescriptor HBondAcceptorCountDescriptor HBondDonorCountDescriptor RotatableBondsCountDescriptor SmallRingDescriptor WeightDescriptor)
            (org.openscience.cdk.fingerprint CircularFingerprinter IFingerprinter)
-           (org.openscience.cdk.qsar.result DoubleArrayResult IntegerArrayResult DoubleResult IntegerResult BooleanResult DoubleArrayResultType IntegerArrayResultType DoubleResultType IntegerResultType BooleanResultType)
-           (java.io StringReader))
-  )
-
-(defn new-atom-container []
-  ; Yes, this really is how you say "new Molecule" in CDK:
-  ;     DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class)
-  ; The Clojure version is even worse, because the method accepts variable additional
-  ; args, and you MUST pass an empty array for those or the method won't be found.
-  (.newInstance (DefaultChemObjectBuilder/getInstance) IAtomContainer (to-array [])))
-
-(defn mdl-reader [molfile]
-  ; CDK might detect the molfile version and use the correct reader for us in the future.
-  (if (re-find #"^(.*\n){3}.*V3000" molfile)
-    (new MDLV3000Reader (new StringReader molfile))
-    (new MDLV2000Reader (new StringReader molfile))))
-
-(defn read-molfile [molfile]
-  (let [reader (mdl-reader molfile)]
-    (try
-      (.read reader (new-atom-container))
-      (catch Exception e))))
+           (org.openscience.cdk.qsar.result DoubleArrayResult IntegerArrayResult DoubleResult IntegerResult BooleanResult DoubleArrayResultType IntegerArrayResultType DoubleResultType IntegerResultType BooleanResultType)))
 
 (defn extract-value [descriptor molecule]
   ; TODO: extend java classes so we don't need ugly conditionals
