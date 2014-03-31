@@ -58,7 +58,7 @@
   (sorted-map
     :identifier (str type-name ":" (CDK/getVersion))
     :names [type-name]
-    :reference ["http://pubs.acs.org/doi/abs/10.1021/ci100050t"] ; TODO: replace with Alex's forthcoming paper
+    :reference "http://pubs.acs.org/doi/abs/10.1021/ci100050t" ; TODO: replace with Alex's forthcoming paper
     :title (.getName (type fingerprinter))
     :version (CDK/getVersion)
     :vendor "The Chemistry Development Kit"
