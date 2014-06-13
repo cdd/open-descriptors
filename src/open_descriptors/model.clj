@@ -75,7 +75,8 @@
     :information (fingerprinter-information fingerprinter type-name)
     :descriptor fingerprinter))
 
-(def descriptors
+; defn so that we get new objects for each request, which is required for thread safety
+(defn descriptors []
   "Vector of descriptors, each of which is a map."
   (concat
     (map descriptor-from-class [
@@ -95,14 +96,13 @@
 
 (def descriptor-information
   "Vector of maps, each containing the details of a descriptor"
-  (map #(% :information) descriptors)) ; "pluck" :information from members of collection
+  (map #(% :information) (descriptors))) ; "pluck" :information from members of collection
 
 (defn calculate [molecule]
   "Returns a map of descriptor id/value pairs for the molecule"
   (into {}
-    ; Would be nice to use pmap, but under heavy load I was seeing java.util.ConcurrentModificationException
-    (map
+    (pmap
       #(vector
         (get-in % [:information :identifier])
         (extract-value (% :descriptor) molecule))
-      descriptors)))
+      (descriptors))))
