@@ -104,5 +104,5 @@
     (pmap
       #(vector
         (get-in % [:information :identifier])
-        (extract-value (% :descriptor) molecule))
+        (extract-value (% :descriptor) (.clone molecule))) ; create a copy to avoid concurrency problems
       (descriptors))))
